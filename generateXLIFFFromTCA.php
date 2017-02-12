@@ -74,6 +74,8 @@ function parseTCAArray($prefix, $module, array &$array) {
     //Isn't already in lang-file
     if(!preg_match("/^LLL:EXT:/", $array['ctrl']['title'])) {
         $lang_array[$prefix . '.title'] = $array['ctrl']['title'];
+        //Manipulate TCA file
+        $array['ctrl']['title'] = 'LLL:EXT:'.$module.'/Resources/Language/locallang.xlf:'.$prefix.'.title';
     }
 
     //columns
@@ -114,13 +116,13 @@ $tca_array = getTCAArray($module_dir, $tca_file);
 $lang_array = parseTCAArray($tca_file, $module, $tca_array);
 
 echo "################################################################################\r\n";
-echo "File: typo3conf/".$module_dir."/Resources/Private/Language/locallang.xlf\r\n";
+echo "File: typo3conf/".basename($module_dir)."/Resources/Private/Language/locallang.xlf\r\n";
 echo "################################################################################\r\n";
 createXliffFile($module, $lang_array);
 
 echo "\r\n";
 echo "################################################################################\r\n";
-echo "File: typo3conf/".$module_dir."/Configuration/TCA/".$tca_file.".php\r\n";
+echo "File: typo3conf/".basename($module_dir)."/Configuration/TCA/".$tca_file.".php\r\n";
 echo "################################################################################\r\n";
 echo "<?php
 return ";
