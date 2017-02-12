@@ -25,14 +25,14 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
-$module     = $argv[1];
-$tca_file   = $argv[2];
+$module = $argv[1];
+$tca_file = $argv[2];
 
 /*
  * ScoutNet.de-Special
  * Plugins in development named plugins.typo3.module_name and linked as module_name
  */
-if(!isset($argv[3])) {
+if (!isset($argv[3])) {
     $module_dir = $module;
 } else {
     $module_dir = $argv[3];
@@ -46,16 +46,17 @@ define("TYPO3_MODE", "generator"); //Pass Access denied. ;)
  * @param string $file
  * @return mixed[] TCA-Array
  */
-function getTCAArray($module_dir, $file) {
-    $array = require_once(getcwd()."/".$module_dir."/Configuration/TCA/".$file.".php");
+function getTCAArray($module_dir, $file)
+{
+    $array = require_once(getcwd() . "/" . $module_dir . "/Configuration/TCA/" . $file . ".php");
     //New Typo3 TCA-file
-    if(is_array($array)) {
-       return $array;
+    if (is_array($array)) {
+        return $array;
     }
 
     //deal with old TCA-File
-    require_once(getcwd()."/".$module_dir."/Configuration/TCA/".$file.".php");
-    foreach($TCA as $key=>$value) {
+    require_once(getcwd() . "/" . $module_dir . "/Configuration/TCA/" . $file . ".php");
+    foreach ($TCA as $key => $value) {
         return $TCA[$key];
     }
 
@@ -67,23 +68,24 @@ function getTCAArray($module_dir, $file) {
  * @param array $array
  * @return mixed[] ID => Label, to generate XLIFF-File
  */
-function parseTCAArray($prefix, $module, array &$array) {
+function parseTCAArray($prefix, $module, array &$array)
+{
     $lang_array = array();
 
     //crtl
     //Isn't already in lang-file
-    if(!preg_match("/^LLL:EXT:/", $array['ctrl']['title'])) {
+    if (!preg_match("/^LLL:EXT:/", $array['ctrl']['title'])) {
         $lang_array[$prefix . '.title'] = $array['ctrl']['title'];
         //Manipulate TCA file
-        $array['ctrl']['title'] = 'LLL:EXT:'.$module.'/Resources/Language/locallang.xlf:'.$prefix.'.title';
+        $array['ctrl']['title'] = 'LLL:EXT:' . $module . '/Resources/Language/locallang.xlf:' . $prefix . '.title';
     }
 
     //columns
-    foreach($array['columns'] as $column=>$value) {
-        if(!preg_match("/^LLL:EXT:/", $value['label'])) {
+    foreach ($array['columns'] as $column => $value) {
+        if (!preg_match("/^LLL:EXT:/", $value['label'])) {
             $lang_array[$prefix . '.' . $column] = $value['label'];
             //Manipulate TCA file
-            $array['columns'][$column]['label'] = 'LLL:EXT:'.$module.'/Resources/Language/locallang.xlf:'.$prefix.'.'.$column;
+            $array['columns'][$column]['label'] = 'LLL:EXT:' . $module . '/Resources/Language/locallang.xlf:' . $prefix . '.' . $column;
         }
     }
 
@@ -94,35 +96,38 @@ function parseTCAArray($prefix, $module, array &$array) {
  * @param string $product_name
  * @param array $lang_array
  */
-function createXliffFile($product_name, array $lang_array) {
-?>
-<?xml version="1.0" encoding="UTF-8"?>
-<xliff version="1.0">
-<file source-language="en" datatype="plaintext" original="messages" date="<?php echo date("Y-m-d").'T'.date("H:i:s").'Z'; ?>" product-name="<?php echo $product_name; ?>">
-    <header/>
-    <body>
-<?php foreach($lang_array as $key=>$value) { ?>
-        <trans-unit id="<?php echo $key; ?>" xml:space="preserve">
+function createXliffFile($product_name, array $lang_array)
+{
+    ?>
+    <? xml version = "1.0" encoding = "UTF-8"?>
+    <xliff version="1.0">
+        <file source-language="en" datatype="plaintext" original="messages"
+              date="<?php echo date("Y-m-d") . 'T' . date("H:i:s") . 'Z'; ?>"
+              product-name="<?php echo $product_name; ?>">
+            <header />
+            <body>
+            <?php foreach ($lang_array as $key => $value) { ?>
+                <trans-unit id="<?php echo $key; ?>" xml:space="preserve">
             <source><?php echo $value; ?></source>
         </trans-unit>
-<?php } ?>
-    </body>
-</file>
-</xliff>
-<?php
+            <?php } ?>
+            </body>
+        </file>
+    </xliff>
+    <?php
 }
 
 $tca_array = getTCAArray($module_dir, $tca_file);
 $lang_array = parseTCAArray($tca_file, $module, $tca_array);
 
 echo "################################################################################\r\n";
-echo "File: typo3conf/".basename($module_dir)."/Resources/Private/Language/locallang.xlf\r\n";
+echo "File: typo3conf/" . basename($module_dir) . "/Resources/Private/Language/locallang.xlf\r\n";
 echo "################################################################################\r\n";
 createXliffFile($module, $lang_array);
 
 echo "\r\n";
 echo "################################################################################\r\n";
-echo "File: typo3conf/".basename($module_dir)."/Configuration/TCA/".$tca_file.".php\r\n";
+echo "File: typo3conf/" . basename($module_dir) . "/Configuration/TCA/" . $tca_file . ".php\r\n";
 echo "################################################################################\r\n";
 echo "<?php
 return ";
