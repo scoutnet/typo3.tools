@@ -99,7 +99,7 @@ function parseTCAArray($prefix, $module, array &$array)
 function createXliffFile($product_name, array $lang_array)
 {
     ?>
-    <? xml version = "1.0" encoding = "UTF-8"?>
+    <xml version = "1.0" encoding = "UTF-8">
     <xliff version="1.0">
         <file source-language="en" datatype="plaintext" original="messages"
               date="<?php echo date("Y-m-d") . 'T' . date("H:i:s") . 'Z'; ?>"
