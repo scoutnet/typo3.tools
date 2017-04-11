@@ -1,5 +1,5 @@
 <?php
-namespace NixMuss\Typo3Tools;
+namespace ScoutNet\Typo3Tools;
 
 /***************************************************************
  *
