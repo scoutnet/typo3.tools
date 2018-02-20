@@ -1,4 +1,5 @@
 <?php
+
 namespace ScoutNet\Typo3Tools;
 
 /***************************************************************
@@ -55,7 +56,7 @@ class generateTCAandExtTables
             }
         }
 
-        if(!isset($this->typo3_src) && !isset($this->document_root)) {
+        if (!isset($this->typo3_src) && !isset($this->document_root)) {
             throw new \Exception("typo3src or docroot required!");
         }
 
@@ -63,7 +64,7 @@ class generateTCAandExtTables
             $this->typo3_src = $this->document_root . "public_html/typo3_src/";
         }
 
-        if(!isset($this->class)) {
+        if (!isset($this->class)) {
             throw new \Exception("class is required!");
         }
 
@@ -78,7 +79,8 @@ class generateTCAandExtTables
         include($this->typo3_src . '/vendor/autoload.php');
     }
 
-    public function run() {
+    public function run()
+    {
         $this->writeTCAFile($this->expandTCAFile($this->getVarAnnotation()));
         $this->writeExtTablesFile($this->getVarAnnotation());
     }
@@ -86,10 +88,10 @@ class generateTCAandExtTables
 
     private function getVarAnnotation($class = null)
     {
-        if (file_exists($this->module_dir . 'Classes/Domain/Model/'.ucfirst($this->getModelname()).'.php') == false) {
+        if (file_exists($this->module_dir . 'Classes/Domain/Model/' . ucfirst($this->getModelname()) . '.php') == false) {
             throw new \Exception("No file!");
         }
-        require_once($this->module_dir . 'Classes/Domain/Model/'.ucfirst($this->getModelname()).'.php');
+        require_once($this->module_dir . 'Classes/Domain/Model/' . ucfirst($this->getModelname()) . '.php');
         $reflection = new \ReflectionClass($this->class);
 
         $fields = array();
@@ -114,8 +116,6 @@ class generateTCAandExtTables
         //Expand array with fields
         foreach ($fields as $field) {
             if (strtolower($field['type']) == "string" || strtolower($field['type']) == "integer" || strtolower($field['type']) == "double") {
-
-
                 $array['columns'][$this->convertFieldname($field['name'])] = array(
                     'label' => $field['name'],
                     'config' => array(
@@ -139,29 +139,34 @@ class generateTCAandExtTables
         return $array;
     }
 
-    private function writeTCAFile(array $tca_array) {
-        $handle = fopen($this->module_dir."/Configuration/TCA/tx_".$this->removeUnderscore($this->module)."_domain_model_".$this->getModelname().".php", "w+");
-        fwrite($handle, file_get_contents(getcwd().'/template_files/ext_access_denied.template'));
-        fwrite($handle, "return ".var_export($tca_array, true).';');
+    private function writeTCAFile(array $tca_array)
+    {
+        $handle = fopen($this->module_dir . "/Configuration/TCA/tx_" . $this->removeUnderscore($this->module) . "_domain_model_" . $this->getModelname() . ".php",
+            "w+");
+        fwrite($handle, file_get_contents(getcwd() . '/template_files/ext_access_denied.template'));
+        fwrite($handle, "return " . var_export($tca_array, true) . ';');
         fclose($handle);
     }
 
-    private function writeExtTablesFile(array $fields) {
-        $content = file_get_contents(getcwd()."/template_files/ext_tables_table.template");
+    private function writeExtTablesFile(array $fields)
+    {
+        $content = file_get_contents(getcwd() . "/template_files/ext_tables_table.template");
 
-        $content = preg_replace('/---tablename---/', "tx_".$this->removeUnderscore($this->module)."_domain_model_".$this->getModelname(), $content);
+        $content = preg_replace('/---tablename---/',
+            "tx_" . $this->removeUnderscore($this->module) . "_domain_model_" . $this->getModelname(), $content);
         $content = preg_replace('/---properties---/', $this->fields2sql($fields), $content);
 
-        $handle = fopen($this->module_dir."ext_tables.sql", "w+");
+        $handle = fopen($this->module_dir . "ext_tables.sql", "a+");
         fwrite($handle, $content);
         fclose($handle);
     }
 
-    private function fields2sql(array $fields) {
+    private function fields2sql(array $fields)
+    {
         $sql = "";
-        foreach($fields as $field) {
-            $sql .= "  ".$this->convertFieldname($field['name']). " ";
-            switch(strtolower($field['type'])) {
+        foreach ($fields as $field) {
+            $sql .= "  " . $this->convertFieldname($field['name']) . " ";
+            switch (strtolower($field['type'])) {
                 case 'integer':
                 case 'int':
                     $sql .= "INT(11)";
@@ -180,32 +185,35 @@ class generateTCAandExtTables
                     break;
             }
             $sql .= ",\n";
-       }
-       return $sql;
+        }
+        return $sql;
     }
 
-    private function convertFieldname($fieldname) {
+    private function convertFieldname($fieldname)
+    {
         return preg_replace_callback('/([A-Z])/',
-            function($m) {
+            function ($m) {
                 return '_' . strtolower($m[1]);
             }, $fieldname);
     }
 
-    private function removeUnderscore($string) {
+    private function removeUnderscore($string)
+    {
         return str_replace("_", "", $string);
     }
 
     /**
      * @return string name of model, first char lowercase
      */
-    private function getModelname() {
-        return lcfirst(substr($this->class, strrpos($this->class, '\\')+1));
+    private function getModelname()
+    {
+        return lcfirst(substr($this->class, strrpos($this->class, '\\') + 1));
     }
 }
 
 try {
     $class = new generateTCAandExtTables($argv);
     return $class->run();
-} catch(\Exception $e) {
-    echo "An error occurs: ".$e->getMessage();
+} catch (\Exception $e) {
+    echo "An error occurs: " . $e->getMessage();
 }
