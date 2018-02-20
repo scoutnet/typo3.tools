@@ -126,6 +126,15 @@ class generateTCAandExtTables
                     ),
                 );
             }
+            if (strtolower($field['type']) == "\datetime") {
+                $array['columns'][$this->convertFieldname($field['name'])] = array(
+                    'label' => $field['name'],
+                    'config' => array(
+                        'type' => 'input',
+                        'eval' => 'date',
+                    ),
+                );
+            }
         }
         return $array;
     }
@@ -161,7 +170,13 @@ class generateTCAandExtTables
                     $sql .= "TEXT";
                     break;
                 case 'double':
-                    $sql .= "DOUBLE";
+                    $sql .= "DOUBLE(7,2)";
+                    break;
+                case '\\datetime':
+                    $sql .= "int(11) unsigned DEFAULT '0' NOT NULL";
+                    break;
+                case (preg_match('/\\.*/', $field['type']) ? true : false): //expect other model
+                    $sql .= 'VARCHAR(255)';
                     break;
             }
             $sql .= ",\n";
